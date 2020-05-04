@@ -7,19 +7,15 @@ import json.CirceJsonCodecs
 import model.{UserAccount, UserAccountResult}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
-import service.UserAccountService
+import service.UserAccountServiceImpl
 
-class UserAccountRoutes[F[_]: Sync](userAccountService: UserAccountService[F])
+class UserAccountRoutes[F[_]: Sync](userAccountService: UserAccountServiceImpl[F])
                                    (implicit httpErr: HttpErrorHandler[F, UserAccountError]) extends Http4sDsl[F] with CirceJsonCodecs {
 
   val routes: HttpRoutes[F] = httpErr.handle(HttpRoutes.of[F] {
     case GET -> Root / IntVar(id) =>
-      for {
-        userDb <- userAccountService.select(id)
-      } yield userDb match {
-        case Some(userAccount)  => Ok(userAccount)
-        case None               => NotFound()
-      }
+      userAccountService.select(id)
+        .flatMap(_.fold(NotFound())(Ok(_)))
 
     case req @ POST -> Root =>
       for {

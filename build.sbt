@@ -4,12 +4,19 @@ version := "0.1"
 
 scalaVersion := "2.13.2"
 
+val logbackVersion = "1.1.3"
 val doobieVersion = "0.8.8"
 val http4sVersion = "0.21.4"
 val circeVersion = "0.13.0"
+val wireVersion = "2.3.3"
+val pureConfigVersion = "0.12.3"
 
 libraryDependencies ++= Seq(
-  // Doobie
+
+//  Logback
+  "ch.qos.logback" % "logback-classic" % logbackVersion % Runtime,
+
+//  Doobie
   "org.tpolecat" %% "doobie-core"      % doobieVersion,
   "org.tpolecat" %% "doobie-hikari"    % doobieVersion,          // HikariCP transactor.
   "org.tpolecat" %% "doobie-postgres"  % doobieVersion,          // Postgres driver 42.2.9 + type mappings.
@@ -27,4 +34,10 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
+
+//  Wire
+  "com.softwaremill.macwire" %% "macros" % wireVersion,
+
+//  Pure Config
+  "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
 )
