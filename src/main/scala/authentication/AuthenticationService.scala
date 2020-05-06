@@ -9,15 +9,14 @@ import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 
 import scala.util.{Failure, Success}
 
-object AuthenticationService {
+class AuthenticationService{
 
   implicit val clock: Clock = Clock.systemUTC
-  val defaultKey = "key"
 
-  def encodeToken(user: UserAccount, key: String = defaultKey): String =
+  def encodeToken(user: UserAccount, key: String): String =
     JwtCirce.encode(user.asJson, key, JwtAlgorithm.HS256)
 
-  def decodeToken(token: String, key: String = defaultKey): Option[JwtClaim] = {
+  def decodeToken(token: String, key: String): Option[JwtClaim] = {
     JwtCirce.decode(token, key, Seq(JwtAlgorithm.HS256)) match {
       case Success(jwtUserJson) => Some(jwtUserJson)
       case Failure(_) => None

@@ -1,3 +1,3 @@
 package config
 
-final case class JwtConfig(password: String)
+final case class JwtConfig(password: String, prefix: String)
