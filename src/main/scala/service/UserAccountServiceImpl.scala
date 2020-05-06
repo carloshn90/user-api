@@ -1,12 +1,12 @@
 package service
 
 import model.UserAccount
+import payload.LoginRequestPayload
 import repository.UserAccountRepository
 
 class UserAccountServiceImpl[F[_]](userAccountRep: UserAccountRepository[F]) extends UserAccountService[F]{
 
-  override def login(email: String, password: String): F[Option[UserAccount]] =
-    userAccountRep.findByEmailAndPassword(email, password)
+  override def login(loginReq: LoginRequestPayload): F[Option[UserAccount]] = userAccountRep.findByEmailAndPassword(loginReq.email, loginReq.password)
 
   override def select(id: Int): F[Option[UserAccount]] = userAccountRep.select(id)
 

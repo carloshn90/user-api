@@ -10,6 +10,7 @@ val http4sVersion = "0.21.4"
 val circeVersion = "0.13.0"
 val wireVersion = "2.3.3"
 val pureConfigVersion = "0.12.3"
+val jwtVersion = "4.2.0"
 
 libraryDependencies ++= Seq(
 
@@ -40,4 +41,8 @@ libraryDependencies ++= Seq(
 
 //  Pure Config
   "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
+
+//  JWT
+  "com.pauldijou" %% "jwt-core" % jwtVersion,
+  "com.pauldijou" %% "jwt-circe" % jwtVersion,
 )

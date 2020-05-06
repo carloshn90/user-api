@@ -20,13 +20,13 @@ object AppConfig extends StrictLogging {
 
   implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-  def load: Either[ConfigReaderFailures, (Server, JdbcConf, Config)] = {
+  def load: Either[ConfigReaderFailures, (Server, JdbcConfig, Config)] = {
     val config = ConfigFactory.parseFile(new File(path), parseOptions).resolve()
     logger.debug("config content:\n {}", config.root().render(renderOptions))
 
     for {
       // validate storage config also
-      j <- ConfigSource.fromConfig(config).at("storage").load[JdbcConf]
+      j <- ConfigSource.fromConfig(config).at("storage").load[JdbcConfig]
       c <- ConfigSource.fromConfig(config).at("server").load[Server]
     } yield (c, j, config)
   }
