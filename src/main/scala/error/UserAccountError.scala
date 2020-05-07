@@ -1,6 +1,6 @@
 package error
 
-import model.UserAccount
+import model.UserAccountModel
 
 sealed trait UserAccountError extends Exception
-case class InvalidUserAccount(userAccount: UserAccount, msg: String) extends UserAccountError
+case class InvalidUserAccount(userAccount: UserAccountModel, msg: String) extends UserAccountError

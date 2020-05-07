@@ -4,11 +4,10 @@ import cats.effect.Sync
 import cats.implicits._
 import json.CirceJsonCodecs
 import middleware.AuthMiddlewareJwt
-import model.{UserAccount, UserAccountResult}
 import org.http4s.{AuthedRoutes, HttpRoutes}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.AuthMiddleware
-import payload.JwtUserPayload
+import payload.{JwtUserPayload, UserAccountPayload, UserAccountResultPayload}
 import service.UserAccountServiceImpl
 
 class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountServiceImpl[F],
@@ -26,22 +25,22 @@ class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService
 
     case req @ POST -> Root as _ =>
       for {
-        userAccount <- req.req.as[UserAccount]
-        userInDb    <- userAccountService.insert(userAccount)
-        resp        <- Ok(UserAccountResult(userInDb))
+        userPayload <- req.req.as[UserAccountPayload]
+        userInDb    <- userAccountService.insert(userPayload)
+        resp        <- Ok(UserAccountResultPayload(userInDb))
       } yield resp
 
     case req @ PUT -> Root as jwtUser =>
       for {
-        userAccount <- req.req.as[UserAccount]
-        userInDb    <- userAccountService.update(jwtUser.userId, userAccount)
-        resp        <- Ok(UserAccountResult(userInDb))
+        userPayload <- req.req.as[UserAccountPayload]
+        userInDb    <- userAccountService.update(jwtUser.userId, userPayload)
+        resp        <- Ok(UserAccountResultPayload(userInDb))
       } yield resp
 
     case DELETE -> Root as jwtUser =>
       for {
         userDelete  <- userAccountService.delete(jwtUser.userId)
-        resp        <- Ok(UserAccountResult(userDelete))
+        resp        <- Ok(UserAccountResultPayload(userDelete))
       } yield resp
   })
 }

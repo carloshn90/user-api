@@ -5,7 +5,7 @@ import doobie.implicits._
 import doobie.util.fragment.Fragment
 import doobie.util.log.LogHandler
 import doobie.util.transactor.Transactor
-import model.UserAccount
+import model.UserAccountModel
 
 import scala.collection.mutable
 
@@ -15,28 +15,28 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
 
   implicit val han: LogHandler = LogHandler.jdkLogHandler
 
-  override def findByEmailAndPassword(email: String, password: String): F[Option[UserAccount]] =
+  override def findByEmailAndPassword(email: String, password: String): F[Option[UserAccountModel]] =
     sql"SELECT * FROM user_account WHERE email = $email AND password = $password"
-      .query[UserAccount]
+      .query[UserAccountModel]
       .to[List]
       .map(_.headOption)
       .transact(xa)
 
-  override def findById(id: Long): F[Option[UserAccount]] =
+  override def findById(id: Long): F[Option[UserAccountModel]] =
     sql"SELECT * FROM user_account"
-      .query[UserAccount]
+      .query[UserAccountModel]
       .to[List]
       .map(_.headOption)
       .transact(xa)
 
-  override def insert(user: UserAccount): F[Int] = {
+  override def insert(user: UserAccountModel): F[Int] = {
     val userAccountFrag =
       fr"VALUES (${user.id}, ${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
 
     (insertUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
   }
 
-  override def update(id: Long, user: UserAccount): F[Int] = {
+  override def update(id: Long, user: UserAccountModel): F[Int] = {
     val userAccountFrag =
       fr"(${user.id}, ${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
 
