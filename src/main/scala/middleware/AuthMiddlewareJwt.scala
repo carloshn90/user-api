@@ -7,31 +7,33 @@ import org.http4s.server._
 import org.http4s.headers.Authorization
 import authentication.AuthenticationService
 import cats.effect.Async
-import config.JwtConfig
-import pdi.jwt.JwtClaim
-
+import com.typesafe.scalalogging.StrictLogging
 import org.http4s.dsl.io._
+import payload.JwtUserPayload
 
-class AuthMiddlewareJwt[F[_]: Async](authService: AuthenticationService, jwtConfig: JwtConfig) {
+class AuthMiddlewareJwt[F[_]: Async](authService: AuthenticationService) extends StrictLogging {
 
-  def authMiddleware: AuthMiddleware[F, JwtClaim] = AuthMiddleware(auth, onFailure)
+  def authMiddleware: AuthMiddleware[F, JwtUserPayload] = AuthMiddleware(auth, onFailure)
 
-  private val auth: Kleisli[F, Request[F], Either[String, JwtClaim]] = Kleisli {
+  private val auth: Kleisli[F, Request[F], Either[String, JwtUserPayload]] = Kleisli {
     req: Request[F] => {
-      authenticateJwtToken(req).toRight("Forbidden").pure[F]
+      val authenticationJwt: Either[String, JwtUserPayload] = authenticateJwtToken(req)
+      authenticationJwt.left.map(error => logger.info(s"$error in the route ${req.uri}"))
+      authenticationJwt.pure[F]
     }
   }
 
   private val onFailure: AuthedRoutes[String, F] =
     Kleisli(_ => OptionT.some(Response(Forbidden)))
 
-  private def authenticateJwtToken(req: Request[F]): Option[JwtClaim] = for {
+  private def authenticateJwtToken(req: Request[F]): Either[String, JwtUserPayload] = for {
       token <- getToken(req)
-      auth  <- authService.decodeToken(token, jwtConfig.password)
+      auth <- authService.decodeToken(token)
     } yield auth
 
-  private def getToken(req: Request[F]): Option[String] = for {
-      header <- req.headers.get(Authorization)
-    } yield header.value.replace(jwtConfig.prefix, "")
+
+  private def getToken(req: Request[F]): Either[String, String] = for {
+      header <- req.headers.get(Authorization).toRight("Authorization header not found")
+    } yield authService.getTokenFromHeader(header.value)
 
 }

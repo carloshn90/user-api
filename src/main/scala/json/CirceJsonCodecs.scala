@@ -6,7 +6,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import payload.LoginRequestPayload
+import payload.{JwtUserPayload, LoginRequestPayload}
 
 trait CirceJsonCodecs {
 
@@ -24,4 +24,7 @@ trait CirceJsonCodecs {
 
   implicit val loginReqPayloadDecoder: Decoder[LoginRequestPayload] = deriveDecoder[LoginRequestPayload]
   implicit def loginReqPayloadEntityDecoder[F[_]: Sync]: EntityDecoder[F, LoginRequestPayload] = jsonOf
+
+  implicit val jwtUserPayloadDecoder: Decoder[JwtUserPayload] = deriveDecoder[JwtUserPayload]
+  implicit val jwtUserPayloadEncoder: Encoder.AsObject[JwtUserPayload] = deriveEncoder[JwtUserPayload]
 }

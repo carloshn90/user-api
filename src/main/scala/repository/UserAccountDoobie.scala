@@ -22,7 +22,7 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
       .map(_.headOption)
       .transact(xa)
 
-  override def select(id: Int): F[Option[UserAccount]] =
+  override def findById(id: Long): F[Option[UserAccount]] =
     sql"SELECT * FROM user_account"
       .query[UserAccount]
       .to[List]
@@ -36,14 +36,14 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
     (insertUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
   }
 
-  override def update(id: Int, user: UserAccount): F[Int] = {
+  override def update(id: Long, user: UserAccount): F[Int] = {
     val userAccountFrag =
       fr"(${user.id}, ${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
 
     (updateUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
   }
 
-  override def delete(id: Int): F[Int] = sql"DELETE FROM user_account WHERE id = $id".update.run.transact(xa)
+  override def delete(id: Long): F[Int] = sql"DELETE FROM user_account WHERE id = $id".update.run.transact(xa)
 }
 
 object UserAccountDoobie {
