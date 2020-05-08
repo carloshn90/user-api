@@ -9,6 +9,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.AuthMiddleware
 import payload.{JwtUserPayload, UserAccountPayload, UserAccountResultPayload}
 import service.UserAccountServiceImpl
+import validation.validationUtil
 
 class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountServiceImpl[F],
                                           authMiddleware: AuthMiddlewareJwt[F]) extends Http4sDsl[F] with CirceJsonCodecs {
@@ -19,22 +20,28 @@ class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService
 
     case GET -> Root as jwtUser =>
       for {
-        userAccount  <- userAccountService.findById(jwtUser.userId)
-        resp        <- userAccount.fold(NotFound())(Ok(_))
+        userAccount   <- userAccountService.findById(jwtUser.userId)
+        resp          <- userAccount.fold(NotFound())(Ok(_))
       } yield resp
 
     case req @ POST -> Root as _ =>
       for {
         userPayload <- req.req.as[UserAccountPayload]
         userInDb    <- userAccountService.insert(userPayload)
-        resp        <- Ok(UserAccountResultPayload(userInDb))
+        resp        <- userInDb.fold(
+          err => BadRequest(validationUtil.getValidationErrors(err)),
+          ok => Ok(UserAccountResultPayload(ok))
+        )
       } yield resp
 
     case req @ PUT -> Root as jwtUser =>
       for {
         userPayload <- req.req.as[UserAccountPayload]
         userInDb    <- userAccountService.update(jwtUser.userId, userPayload)
-        resp        <- Ok(UserAccountResultPayload(userInDb))
+        resp        <- userInDb.fold(
+          err => BadRequest(validationUtil.getValidationErrors(err)),
+          ok => Ok(UserAccountResultPayload(ok))
+        )
       } yield resp
 
     case DELETE -> Root as jwtUser =>

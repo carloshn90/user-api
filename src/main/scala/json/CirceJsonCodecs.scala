@@ -23,4 +23,6 @@ trait CirceJsonCodecs {
 
   implicit val jwtUserPayloadDecoder: Decoder[JwtUserPayload] = deriveDecoder[JwtUserPayload]
   implicit val jwtUserPayloadEncoder: Encoder.AsObject[JwtUserPayload] = deriveEncoder[JwtUserPayload]
+
+  implicit def validationListEntityEncoder[F[_]: Applicative]: EntityEncoder[F, List[String]] = jsonEncoderOf
 }

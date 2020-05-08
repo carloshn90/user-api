@@ -7,7 +7,7 @@ final case class UserAccountModel
   id: Option[Long],
   name: String,
   surname: String,
-  nickname: String,
+  username: String,
   email: String,
   password: String
 )
@@ -15,5 +15,5 @@ final case class UserAccountModel
 object UserAccountModel {
 
   def fromUserAccountPayload(userPayload: UserAccountPayload): UserAccountModel =
-    UserAccountModel(None, userPayload.name, userPayload.surname, userPayload.nickname, userPayload.email, userPayload.password)
+    UserAccountModel(None, userPayload.name, userPayload.surname, userPayload.username, userPayload.email, userPayload.password)
 }

@@ -1,11 +1,12 @@
 package service
 
 import authentication.AuthenticationService
-import cats.data.{IdT, OptionT}
+import cats.data.{EitherT, IdT, NonEmptyChain, OptionT}
 import cats.effect.Async
 import model.UserAccountModel
 import payload.{JwtUserPayload, LoginRequestPayload, UserAccountPayload}
 import repository.UserAccountRepository
+import validation.UserAccountValidation
 
 class UserAccountServiceImpl[F[_]: Async](userAccountRep: UserAccountRepository[F],
                                           authService: AuthenticationService) extends UserAccountService[F]{
@@ -31,26 +32,27 @@ class UserAccountServiceImpl[F[_]: Async](userAccountRep: UserAccountRepository[
     findByIdOptionT.value
   }
 
-  override def insert(user: UserAccountPayload): F[Int] = {
+  override def insert(user: UserAccountPayload): F[Either[NonEmptyChain[UserAccountValidation], Int]] = {
 
-    val insertResultIdT: IdT[F, Int] = for {
-      userModel <- IdT.pure(UserAccountModel.fromUserAccountPayload(user))
-      result    <- IdT(userAccountRep.insert(userModel))
+    val insertResultEitherT: EitherT[F, NonEmptyChain[UserAccountValidation], Int]= for {
+      validUserPayload  <- EitherT.fromEither(UserAccountPayload.validate(user).toEither)
+      userModel         <- EitherT.rightT(UserAccountModel.fromUserAccountPayload(validUserPayload))
+      result            <- EitherT.right(userAccountRep.insert(userModel))
     } yield result
 
-    insertResultIdT.value
+    insertResultEitherT.value
   }
 
-  override def update(id: Long, user: UserAccountPayload): F[Int] = {
+  override def update(id: Long, user: UserAccountPayload): F[Either[NonEmptyChain[UserAccountValidation], Int]] = {
 
-    val updateResultIdT: IdT[F, Int] = for {
-      userModel   <- IdT.pure(UserAccountModel.fromUserAccountPayload(user))
-      result      <- IdT(userAccountRep.update(id, userModel))
+    val updateResultEitherT: EitherT[F, NonEmptyChain[UserAccountValidation], Int] = for {
+      validUserPayload     <- EitherT.fromEither(UserAccountPayload.validate(user).toEither)
+      userModel            <- EitherT.rightT(UserAccountModel.fromUserAccountPayload(validUserPayload))
+      result               <- EitherT.right(userAccountRep.update(id, userModel))
     } yield result
 
-    updateResultIdT.value
+    updateResultEitherT.value
   }
 
   override def delete(id: Long): F[Int] = userAccountRep.delete(id)
-
 }
