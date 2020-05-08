@@ -31,16 +31,16 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
 
   override def insert(user: UserAccountModel): F[Int] = {
     val userAccountFrag =
-      fr"VALUES (${user.id}, ${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
+      fr"VALUES (${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
 
     (insertUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
   }
 
   override def update(id: Long, user: UserAccountModel): F[Int] = {
     val userAccountFrag =
-      fr"(${user.id}, ${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
+      fr"(${user.name}, ${user.surname}, ${user.nickname}, ${user.email}, ${user.password})"
 
-    (updateUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
+    (updateUserAccountFrag ++ userAccountFrag ++ whereIdEqualFrag ++ fr"$id").update.run.transact(xa)
   }
 
   override def delete(id: Long): F[Int] = sql"DELETE FROM user_account WHERE id = $id".update.run.transact(xa)
@@ -49,10 +49,11 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
 object UserAccountDoobie {
 
   val (columns, columnsWithComma) = {
-    val columns = mutable.LinkedHashSet[String]("id", "name", "username", "nickname", "email", "password")
+    val columns = mutable.LinkedHashSet[String]("name", "surname", "nickname", "email", "password")
     (columns.toSet, columns.mkString(","))
   }
 
   val insertUserAccountFrag: Fragment = fr"INSERT INTO user_account (" ++ Fragment.const(columnsWithComma) ++ fr")"
   val updateUserAccountFrag: Fragment = fr"UPDATE user_account SET (" ++ Fragment.const(columnsWithComma) ++ fr") = "
+  val whereIdEqualFrag: Fragment = fr"WHERE id = "
 }

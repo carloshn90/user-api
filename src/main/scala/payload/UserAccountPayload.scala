@@ -7,11 +7,12 @@ final case class UserAccountPayload
   name: String,
   surname: String,
   nickname: String,
-  email: String
+  email: String,
+  password: String
 )
 
 object UserAccountPayload {
 
-  def userAccountModalToPayload(userModel: UserAccountModel): UserAccountPayload =
-    UserAccountPayload(userModel.name, userModel.surname, userModel.nickname, userModel.email)
+  def fromUserAccountModel(userModel: UserAccountModel): UserAccountPayload =
+    UserAccountPayload(userModel.name, userModel.surname, userModel.nickname, userModel.email, userModel.password)
 }

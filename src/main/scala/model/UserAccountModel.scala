@@ -9,10 +9,11 @@ final case class UserAccountModel
   surname: String,
   nickname: String,
   email: String,
-  password: Option[String]
+  password: String
 )
 
 object UserAccountModel {
-  def userPayloadToModel(userPayload: UserAccountPayload): UserAccountModel =
-    UserAccountModel(None, userPayload.name, userPayload.surname, userPayload.nickname, userPayload.email, None)
+
+  def fromUserAccountPayload(userPayload: UserAccountPayload): UserAccountModel =
+    UserAccountModel(None, userPayload.name, userPayload.surname, userPayload.nickname, userPayload.email, userPayload.password)
 }
