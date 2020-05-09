@@ -30,7 +30,16 @@ case object PasswordDoesNotMeetCriteria extends UserAccountValidation {
   def errorMessage: String = "Password must be at least 10 characters long, including an uppercase and a lowercase letter, one number and one special character."
 }
 
-object validationUtil {
+object ValidationUtil {
+
+  val emailMatcher: String = "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)" +
+    "*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?+$"
+
+  val genericMatcher: String = "^[a-zA-Z]+$"
+
+  val passwordMatcher: String = "(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"
+
+  val usernameMatcher: String = "^[a-zA-Z0-9]+$"
 
   def getValidationErrors(chain: NonEmptyChain[UserAccountValidation]): List[String] =
     chain.toList.map(err => err.errorMessage)

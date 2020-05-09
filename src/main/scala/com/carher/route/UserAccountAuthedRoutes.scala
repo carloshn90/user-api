@@ -6,7 +6,7 @@ import com.carher.json.CirceJsonCodecs
 import com.carher.middleware.AuthMiddlewareJwt
 import com.carher.payload.{JwtUserPayload, UserAccountPayload, UserAccountResultPayload}
 import com.carher.service.UserAccountServiceImpl
-import com.carher.validation.validationUtil
+import com.carher.validation.ValidationUtil
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.AuthMiddleware
 import org.http4s.{AuthedRoutes, HttpRoutes}
@@ -29,7 +29,7 @@ class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService
         userPayload <- req.req.as[UserAccountPayload]
         userInDb    <- userAccountService.insert(userPayload)
         resp        <- userInDb.fold(
-          err => BadRequest(validationUtil.getValidationErrors(err)),
+          err => BadRequest(ValidationUtil.getValidationErrors(err)),
           ok => Ok(UserAccountResultPayload(ok))
         )
       } yield resp
@@ -39,7 +39,7 @@ class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService
         userPayload <- req.req.as[UserAccountPayload]
         userInDb    <- userAccountService.update(jwtUser.userId, userPayload)
         resp        <- userInDb.fold(
-          err => BadRequest(validationUtil.getValidationErrors(err)),
+          err => BadRequest(ValidationUtil.getValidationErrors(err)),
           ok => Ok(UserAccountResultPayload(ok))
         )
       } yield resp

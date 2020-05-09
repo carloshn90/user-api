@@ -30,22 +30,20 @@ object UserAccountPayload {
     ).mapN(UserAccountPayload.apply)
 
   private def validateName(name: String): ValidationResult[String] =
-    if (!name.isEmpty && name.matches("^[a-zA-Z]+$")) name.validNec else NameDoesNotMeetCriteria.invalidNec
+    if (!name.isEmpty && name.matches(ValidationUtil.genericMatcher)) name.validNec else NameDoesNotMeetCriteria.invalidNec
 
   private def validateSurname(surname: String): ValidationResult[String] =
-    if (!surname.isEmpty && surname.matches("^[a-zA-Z]+$")) surname.validNec else SurnameDoesNotMeetCriteria.invalidNec
+    if (!surname.isEmpty && surname.matches(ValidationUtil.genericMatcher)) surname.validNec else SurnameDoesNotMeetCriteria.invalidNec
 
   private def validateUsername(username: String): ValidationResult[String] =
-    if (!username.isEmpty && username.matches("^[a-zA-Z0-9]+$")) username.validNec else UsernameDoesNotMeetCriteria.invalidNec
+    if (!username.isEmpty && username.matches(ValidationUtil.usernameMatcher)) username.validNec else UsernameDoesNotMeetCriteria.invalidNec
 
   private def validateEmail(email: String): ValidationResult[String] = {
-    val emailMatcher = "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)" +
-      "*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?+$"
-    if (!email.isEmpty && email.matches(emailMatcher)) email.validNec else EmailDoesNotMeetCriteria.invalidNec
+    if (!email.isEmpty && email.matches(ValidationUtil.emailMatcher)) email.validNec else EmailDoesNotMeetCriteria.invalidNec
   }
 
   private def validatePassword(password: String): ValidationResult[String] =
-    if (!password.isEmpty && password.matches("(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"))
+    if (!password.isEmpty && password.matches(ValidationUtil.passwordMatcher))
       password.validNec
     else PasswordDoesNotMeetCriteria.invalidNec
 }
