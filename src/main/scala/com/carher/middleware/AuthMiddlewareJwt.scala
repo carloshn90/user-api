@@ -33,7 +33,8 @@ class AuthMiddlewareJwt[F[_]: Async](authService: AuthenticationService) extends
 
 
   private def getToken(req: Request[F]): Either[String, String] = for {
-      header <- req.headers.get(Authorization).toRight("Authorization header not found")
-    } yield authService.getTokenFromHeader(header.value)
+    header  <- req.headers.get(Authorization).toRight("Authorization header not found")
+    token   <- authService.getTokenFromHeader(header.value)
+  } yield token
 
 }

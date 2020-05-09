@@ -16,12 +16,6 @@ class AuthenticationService(jwtConfig: JwtConfig) extends CirceJsonCodecs {
 
   implicit val clock: Clock = Clock.systemUTC
 
-  def createClaim(jwtUser: JwtUserPayload): JwtClaim = JwtClaim(
-    expiration = Some(Instant.now.plusSeconds(jwtConfig.expirationSeconds).getEpochSecond),
-    issuedAt = Some(Instant.now.getEpochSecond),
-    content = jwtUser.asJson.noSpaces
-  )
-
   def encodeToken(jwtUser: JwtUserPayload): Option[String] = for {
     claim <- Some(createClaim(jwtUser))
     token <- Some(JwtCirce.encode(claim, jwtConfig.password, JwtAlgorithm.HS256))
@@ -34,10 +28,19 @@ class AuthenticationService(jwtConfig: JwtConfig) extends CirceJsonCodecs {
     }
   }
 
-  def getJwtUser(jwtClaim: JwtClaim): Either[Error, JwtUserPayload] = for {
-      jwtUser <- decode[JwtUserPayload](jwtClaim.content)
-    } yield jwtUser
+  def getTokenFromHeader(header: String): Either[String, String] = for {
+    validHeader <- if (header.contains(jwtConfig.prefix + " ")) Right(header) else Left("Authorization prefix not found")
+    result      <- Right(validHeader.replace(jwtConfig.prefix, "").trim)
+  } yield result
 
-  def getTokenFromHeader(header: String): String = header.replace(jwtConfig.prefix, "")
+  private def getJwtUser(jwtClaim: JwtClaim): Either[Error, JwtUserPayload] = for {
+    jwtUser <- decode[JwtUserPayload](jwtClaim.content)
+  } yield jwtUser
+
+  private def createClaim(jwtUser: JwtUserPayload): JwtClaim = JwtClaim(
+    expiration = Some(Instant.now.plusSeconds(jwtConfig.expirationSeconds).getEpochSecond),
+    issuedAt = Some(Instant.now.getEpochSecond),
+    content = jwtUser.asJson.noSpaces
+  )
 
 }
