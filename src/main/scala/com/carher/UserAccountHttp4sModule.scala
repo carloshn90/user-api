@@ -4,7 +4,7 @@ import cats.effect.{Async, ContextShift}
 import cats.implicits._
 import com.carher.authentication.AuthenticationService
 import com.carher.config.{JdbcConfig, JwtConfig}
-import com.carher.error.{HttpErrorHandler, UserAccountError, UserAccountHttpErrorHandler}
+import com.carher.error.{HttpErrorHandler, UserAccountHttpErrorHandler}
 import com.carher.middleware.AuthMiddlewareJwt
 import com.carher.repository.UserAccountDoobie
 import com.carher.route.{UserAccountAuthedRoutes, UserAccountRoutes}
@@ -22,8 +22,7 @@ class UserAccountHttp4sModule[F[_]: Async: ContextShift](cfg: JdbcConfig, apiPre
   val authService: AuthenticationService = new AuthenticationService(jwtConfig)
   val userAccountService: UserAccountServiceImpl[F] = wire[UserAccountServiceImpl[F]]
   val authMiddleware: AuthMiddlewareJwt[F] = wire[AuthMiddlewareJwt[F]]
-
-  implicit val errorHandler: HttpErrorHandler[F, UserAccountError] = new UserAccountHttpErrorHandler[F]()
+  val errorHandler: HttpErrorHandler[F] = wire[UserAccountHttpErrorHandler[F]]
 
   val routes: HttpRoutes[F] = Router(apiPrefix -> errorHandler.handle(wire[UserAccountRoutes[F]].routes <+> wire[UserAccountAuthedRoutes[F]].authRoutes))
 }
