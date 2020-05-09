@@ -16,13 +16,13 @@ object AppConfig extends StrictLogging {
   private val parseOptions = ConfigParseOptions.defaults().setAllowMissing(false)
   private val renderOptions = ConfigRenderOptions.defaults().setOriginComments(false)
 
-  private val path = sys.env.getOrElse("APP_CONFIG_PATH", "src/main/resources/application.conf")
+  private val path: String = sys.env.getOrElse("APP_CONFIG_PATH", "src/main/resources/application.conf")
 
   implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
   def load: Either[ConfigReaderFailures, (Server, JdbcConfig, JwtConfig, Config)] = {
     val config = ConfigFactory.parseFile(new File(path), parseOptions).resolve()
-    logger.debug("com.carher.config content:\n {}", config.root().render(renderOptions))
+    logger.debug("config content:\n {}", config.root().render(renderOptions))
 
     for {
       // validate storage config also
