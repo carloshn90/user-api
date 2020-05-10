@@ -5,11 +5,11 @@ import com.carher.UnitSpec
 import com.carher.authentication.AuthenticationService
 import com.carher.config.JwtConfig
 import com.carher.payload.JwtUserPayload
-import com.softwaremill.macwire.wire
 import org.http4s.{AuthScheme, AuthedRoutes, Credentials, Headers, Request}
 import org.http4s.implicits._
 import org.http4s.dsl.io._
 import org.http4s.headers.Authorization
+import com.softwaremill.macwire.wire
 
 
 class AuthMiddlewareJwtTest extends UnitSpec {
@@ -23,9 +23,11 @@ class AuthMiddlewareJwtTest extends UnitSpec {
 
   "Request without Authorization" should "response with status forbidden" in {
 
-    for (r <- authMiddlewareJwt.authMiddleware(authedRoutes).orNotFound(Request[IO]())) yield {
-      r.status shouldBe Forbidden
-    }
+    val response = authMiddlewareJwt.authMiddleware(authedRoutes)
+      .orNotFound(Request[IO]())
+      .unsafeRunSync()
+
+    response.status shouldBe Forbidden
   }
 
   "Request with correct Jwt token" should "response with status Ok" in {
@@ -35,9 +37,11 @@ class AuthMiddlewareJwtTest extends UnitSpec {
     val authorizationHeader = Headers.of(Authorization(Credentials.Token(AuthScheme.Bearer, correctToken)))
     val request: Request[IO] = Request[IO](headers = authorizationHeader)
 
-    for (r <- authMiddlewareJwt.authMiddleware(authedRoutes).orNotFound(request)) yield {
-      r.status shouldBe Ok
-    }
+    val response = authMiddlewareJwt.authMiddleware(authedRoutes)
+      .orNotFound(request)
+      .unsafeRunSync()
+
+    response.status shouldBe Ok
   }
 
 }

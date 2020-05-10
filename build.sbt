@@ -4,6 +4,10 @@ version := "0.1"
 
 scalaVersion := "2.13.2"
 
+fork in Test := true
+
+envVars in Test := Map("APP_CONFIG_PATH" -> "src/test/resources/application-test.conf")
+
 val logbackVersion = "1.1.3"
 val doobieVersion = "0.8.8"
 val http4sVersion = "0.21.4"
