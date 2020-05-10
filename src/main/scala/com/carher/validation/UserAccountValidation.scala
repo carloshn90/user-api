@@ -37,8 +37,6 @@ object ValidationUtil {
 
   val genericMatcher: String = "^[a-zA-Z]+$"
 
-  val passwordMatcher: String = "(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"
-
   val usernameMatcher: String = "^[a-zA-Z0-9]+$"
 
   def getValidationErrors(chain: NonEmptyChain[UserAccountValidation]): List[String] =

@@ -42,8 +42,9 @@ object UserAccountPayload {
     if (!email.isEmpty && email.matches(ValidationUtil.emailMatcher)) email.validNec else EmailDoesNotMeetCriteria.invalidNec
   }
 
+//  The password is encode for this reason we only can check that it is not empty
   private def validatePassword(password: String): ValidationResult[String] =
-    if (!password.isEmpty && password.matches(ValidationUtil.passwordMatcher))
+    if (!password.isEmpty)
       password.validNec
     else PasswordDoesNotMeetCriteria.invalidNec
 }
