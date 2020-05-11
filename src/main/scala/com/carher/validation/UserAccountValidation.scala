@@ -37,7 +37,7 @@ object ValidationUtil {
   val usernameMatcher: String = "^[a-zA-Z0-9]+$"
 
   def getValidationErrors(chain: NonEmptyChain[UserAccountValidation]): List[String] =
-    chain.toList.map(err => err.errorMessage)
+    chain.toList.map(userValidation => userValidation.errorMessage)
 
 }
 

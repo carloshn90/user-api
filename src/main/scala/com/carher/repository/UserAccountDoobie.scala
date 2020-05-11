@@ -1,6 +1,7 @@
 package com.carher.repository
 
 import cats.effect.Sync
+import cats.implicits._
 import com.carher.model.UserAccountModel
 import com.carher.repository.UserAccountDoobie._
 import doobie.implicits._
@@ -28,18 +29,35 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
       .map(_.headOption)
       .transact(xa)
 
-  override def insert(user: UserAccountModel): F[Int] = {
+  override def insert(user: UserAccountModel): F[Either[String, Long]] = {
     val userAccountFrag =
       fr"VALUES (${user.name}, ${user.surname}, ${user.username}, ${user.email}, ${user.password})"
 
-    (insertUserAccountFrag ++ userAccountFrag).update.run.transact(xa)
+    (insertUserAccountFrag ++ userAccountFrag).update
+      .withUniqueGeneratedKeys[Long]("id")
+      .transact(xa)
+      .attemptSomeSqlState { case ex => ex.value }
+      .attempt
+      .map {
+        case Left(ex) => Either.left[String, Long](ex.getMessage)
+        case Right(value) => value
+      }
   }
 
-  override def update(id: Long, user: UserAccountModel): F[Int] = {
+  override def update(id: Long, user: UserAccountModel): F[Either[String, Long]] = {
+
     val userAccountFrag =
       fr"(${user.name}, ${user.surname}, ${user.username}, ${user.email}, ${user.password})"
 
-    (updateUserAccountFrag ++ userAccountFrag ++ whereIdEqualFrag ++ fr"$id").update.run.transact(xa)
+    (updateUserAccountFrag ++ userAccountFrag ++ whereIdEqualFrag ++ fr"$id").update
+      .withUniqueGeneratedKeys[Long]("id")
+      .transact(xa)
+      .attemptSomeSqlState { case ex => ex.value}
+      .attempt
+      .map {
+        case Left(ex) => Either.left[String, Long](ex.getMessage)
+        case Right(value) => value
+      }
   }
 
   override def delete(id: Long): F[Int] = sql"DELETE FROM user_account WHERE id = $id".update.run.transact(xa)
