@@ -5,12 +5,12 @@ import cats.implicits._
 import com.carher.json.CirceJsonCodecs
 import com.carher.middleware.AuthMiddlewareJwt
 import com.carher.payload.{JwtUserPayload, UserAccountPayload, UserAccountResultPayload}
-import com.carher.service.UserAccountServiceImpl
+import com.carher.service.UserAccountService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.AuthMiddleware
 import org.http4s.{AuthedRoutes, HttpRoutes}
 
-class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountServiceImpl[F],
+class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService[F],
                                           authMiddleware: AuthMiddlewareJwt[F]) extends Http4sDsl[F] with CirceJsonCodecs {
 
   val middleware: AuthMiddleware[F, JwtUserPayload] = authMiddleware.authMiddleware
@@ -29,7 +29,7 @@ class UserAccountAuthedRoutes[F[_]: Sync](userAccountService: UserAccountService
         userInDb    <- userAccountService.insert(userPayload)
         resp        <- userInDb.fold(
           err => BadRequest(err),
-          ok => Ok(UserAccountResultPayload(ok))
+          ok => Created(UserAccountResultPayload(ok))
         )
       } yield resp
 

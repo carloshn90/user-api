@@ -20,6 +20,8 @@ val wireVersion = "2.3.3"
 val pureConfigVersion = "0.12.3"
 val jwtVersion = "4.2.0"
 val otjPgVersion = "0.13.3"
+val scalaMockVersion = "4.4.0"
+val scalaTestVersion = "3.1.0"
 
 libraryDependencies ++= Seq(
 
@@ -58,4 +60,7 @@ libraryDependencies ++= Seq(
 
 //  Embedded postgesql
   "com.opentable.components" % "otj-pg-embedded" % otjPgVersion % Test,
+
+  "org.scalamock" %% "scalamock" % scalaMockVersion % Test,
+  "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
 )

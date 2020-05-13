@@ -1,7 +1,7 @@
 package com.carher.json
 
 import cats.Applicative
-import cats.effect.{IO, Sync}
+import cats.effect.Sync
 import com.carher.payload.{JwtUserPayload, LoginRequestPayload, UserAccountPayload, UserAccountResultPayload}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
@@ -17,7 +17,8 @@ trait CirceJsonCodecs {
 
   implicit val userAccountResultEncoder: Encoder.AsObject[UserAccountResultPayload] = deriveEncoder[UserAccountResultPayload]
   implicit def userAccountResultEntityEncoder[F[_]: Applicative]: EntityEncoder[F, UserAccountResultPayload] = jsonEncoderOf
-  implicit val userAccountResultIoEncoder: EntityEncoder[IO, UserAccountResultPayload] = jsonEncoderOf[IO, UserAccountResultPayload]
+  implicit val userAccountResultDecoder: Decoder[UserAccountResultPayload] = deriveDecoder[UserAccountResultPayload]
+  implicit def userAccountResultEntityDecoder[F[_]: Sync]: EntityDecoder[F, UserAccountResultPayload] = jsonOf
 
   implicit val loginReqPayloadDecoder: Decoder[LoginRequestPayload] = deriveDecoder[LoginRequestPayload]
   implicit def loginReqPayloadEntityDecoder[F[_]: Sync]: EntityDecoder[F, LoginRequestPayload] = jsonOf
