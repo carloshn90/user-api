@@ -2,12 +2,13 @@ package com.carher.error
 
 import cats.effect._
 import com.carher.UnitSpec
+import com.carher.http4s.matcher.Http4sResponseMatchers
 import org.http4s.{HttpRoutes, Request}
 import org.http4s.implicits._
 import org.http4s.Status.InternalServerError
 import com.softwaremill.macwire.wire
 
-class UserAccountHttpErrorHandlerTest extends UnitSpec {
+class UserAccountHttpErrorHandlerTest extends UnitSpec with Http4sResponseMatchers[IO] {
 
   val userAccountHttpErrorHandler: UserAccountHttpErrorHandler[IO] = wire[UserAccountHttpErrorHandler[IO]]
 
@@ -17,14 +18,8 @@ class UserAccountHttpErrorHandlerTest extends UnitSpec {
 
     val handleErrorRoute: HttpRoutes[IO] = userAccountHttpErrorHandler.handle(errRoute)
     val response = handleErrorRoute.orNotFound(Request[IO]())
-      .unsafeRunSync()
-    val bodyMessageVector = response.bodyAsText
-      .compile
-      .toVector
-      .unsafeRunSync()
 
-    response.status shouldBe InternalServerError
-    bodyMessageVector shouldBe Vector(s"Internal server error: $tesMessage")
+    response should beStatusAndBody(InternalServerError, s"Internal server error: $tesMessage")
   }
 
   "Http error handle exception with message" should "response with internal server error" in {
@@ -32,14 +27,8 @@ class UserAccountHttpErrorHandlerTest extends UnitSpec {
 
     val handleErrorRoute: HttpRoutes[IO] = userAccountHttpErrorHandler.handle(errRoute)
     val response = handleErrorRoute.orNotFound(Request[IO]().withEmptyBody)
-      .unsafeRunSync()
-    val bodyMessageVector = response.bodyAsText
-      .compile
-      .toVector
-      .unsafeRunSync()
 
-    response.status shouldBe InternalServerError
-    bodyMessageVector should have size 0
+    response should beStatusAndBody(InternalServerError, "")
   }
 
 }

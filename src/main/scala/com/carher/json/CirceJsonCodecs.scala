@@ -20,6 +20,8 @@ trait CirceJsonCodecs {
   implicit val userAccountResultDecoder: Decoder[UserAccountResultPayload] = deriveDecoder[UserAccountResultPayload]
   implicit def userAccountResultEntityDecoder[F[_]: Sync]: EntityDecoder[F, UserAccountResultPayload] = jsonOf
 
+  implicit val loginReqPayloadEncoder: Encoder.AsObject[LoginRequestPayload] = deriveEncoder[LoginRequestPayload]
+  implicit def loginReqPayloadEntityEncoder[F[_]: Applicative]: EntityEncoder[F, LoginRequestPayload] = jsonEncoderOf
   implicit val loginReqPayloadDecoder: Decoder[LoginRequestPayload] = deriveDecoder[LoginRequestPayload]
   implicit def loginReqPayloadEntityDecoder[F[_]: Sync]: EntityDecoder[F, LoginRequestPayload] = jsonOf
 

@@ -1,11 +1,13 @@
-package com.carher.matcher.http4s
+package com.carher.http4s.matcher
 
 import cats.MonadError
+import cats.effect.IO
 import org.http4s.{EntityDecoder, Response, Status}
 import org.scalatest.matchers.{MatchResult, Matcher}
 
-
 trait Http4sResponseMatchers[F[_]] {
+
+  implicit def run[A]: IO[A] => A = (io: IO[A]) => io.unsafeRunSync
 
   def beStatus(status: Status)(implicit run: F[Response[F]] => Response[F]): StatusMatcher = StatusMatcher(status)
 

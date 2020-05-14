@@ -3,22 +3,19 @@ package com.carher.route
 import cats.effect.IO
 import cats.implicits._
 import com.carher.UnitSpec
+import com.carher.http4s.matcher.Http4sResponseMatchers
+import com.carher.http4s.util.Http4sUtil.createBody
 import com.carher.json.CirceJsonCodecs
-import com.carher.matcher.http4s.Http4sResponseMatchers
 import com.carher.mock.middleware.AuthMiddlewareMock
 import com.carher.payload.{UserAccountPayload, UserAccountResultPayload}
 import com.carher.service.UserAccountService
 import com.softwaremill.macwire.wire
-import fs2.Stream
 import org.http4s.{Method, Request, Response, Status}
 import org.http4s.implicits._
-import io.circe.syntax._
 
 import scala.language.postfixOps
 
 class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Http4sResponseMatchers[IO] {
-
-  implicit def run[A]: IO[A] => A = (x: IO[A]) => x.unsafeRunSync
 
   private val userAccountPayload: UserAccountPayload = UserAccountPayload("name-test", "surname-test", "username", "email-test", "password-test")
   private val authMiddlewareMock: AuthMiddlewareMock[IO] = wire[AuthMiddlewareMock[IO]]
@@ -55,7 +52,6 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
     val idInserted = 1L
     val insertedOk: Either[List[String], Long] = Either.right[List[String], Long](idInserted)
     val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
-    val userPayloadJson: String = userAccountPayload.asJson.noSpaces
     val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
       userAccountServiceMock, authMiddlewareMock.success
     )
@@ -67,7 +63,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .run(Request(
         method = Method.POST,
         uri = uri"/",
-        body = Stream.emits(userPayloadJson.toArray.map(json => json.toByte))
+        body = createBody(userAccountPayload)
       ))
 
     response should beStatusAndBody(Status.Created, UserAccountResultPayload(idInserted))
@@ -76,7 +72,6 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
   "Post create userAccount some error" should "status bad request" in {
     val insertedError: Either[List[String], Long] = Either.left[List[String], Long](List("error"))
     val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
-    val userPayloadJson: String = userAccountPayload.asJson.noSpaces
     val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
       userAccountServiceMock, authMiddlewareMock.success
     )
@@ -88,7 +83,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .run(Request(
         method = Method.POST,
         uri = uri"/",
-        body = Stream.emits(userPayloadJson.toArray.map(json => json.toByte))
+        body = createBody(userAccountPayload)
       ))
 
     response should beStatus(Status.BadRequest)
@@ -112,7 +107,6 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
     val idUpdated = 1L
     val updatedOk: Either[List[String], Long] = Either.right[List[String], Long](idUpdated)
     val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
-    val userPayloadJson: String = userAccountPayload.asJson.noSpaces
     val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
       userAccountServiceMock, authMiddlewareMock.success
     )
@@ -124,7 +118,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .run(Request(
         method = Method.PUT,
         uri = uri"/",
-        body = Stream.emits(userPayloadJson.toArray.map(json => json.toByte))
+        body = createBody(userAccountPayload)
       ))
 
     response should beStatusAndBody(Status.Ok, UserAccountResultPayload(idUpdated))
@@ -133,7 +127,6 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
   "Put update userAccount some error" should "status bad request" in {
     val updatedError: Either[List[String], Long] = Either.left[List[String], Long](List("error"))
     val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
-    val userPayloadJson: String = userAccountPayload.asJson.noSpaces
     val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
       userAccountServiceMock, authMiddlewareMock.success
     )
@@ -145,7 +138,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .run(Request(
         method = Method.PUT,
         uri = uri"/",
-        body = Stream.emits(userPayloadJson.toArray.map(json => json.toByte))
+        body = createBody(userAccountPayload)
       ))
 
     response should beStatus(Status.BadRequest)
@@ -161,6 +154,39 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
     val response: IO[Response[IO]] = userAccountAuthedRoutes.authRoutes
       .orNotFound
       .run(Request(method = Method.PUT, uri = uri"/"))
+
+    response should beStatus(Status.Forbidden)
+  }
+
+  "Delete userAccount authorized" should "status ok and the number of row deleted" in {
+    val numberOfRowDeleted: Int = 1
+    val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
+    val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
+      userAccountServiceMock, authMiddlewareMock.success
+    )
+
+    (userAccountServiceMock.delete _).expects(*).returning(IO.pure(numberOfRowDeleted)).once()
+
+    val response: IO[Response[IO]] = userAccountAuthedRoutes.authRoutes
+      .orNotFound
+      .run(Request(
+        method = Method.DELETE,
+        uri = uri"/"
+      ))
+
+    response should beStatusAndBody(Status.Ok, UserAccountResultPayload(numberOfRowDeleted))
+  }
+
+  "Delete userAccount not authorized" should "status forbidden" in {
+
+    val userAccountServiceMock: UserAccountService[IO] = mock[UserAccountService[IO]]
+    val userAccountAuthedRoutes: UserAccountAuthedRoutes[IO] = new UserAccountAuthedRoutes[IO](
+      userAccountServiceMock, authMiddlewareMock.forbidden
+    )
+
+    val response: IO[Response[IO]] = userAccountAuthedRoutes.authRoutes
+      .orNotFound
+      .run(Request(method = Method.DELETE, uri = uri"/"))
 
     response should beStatus(Status.Forbidden)
   }

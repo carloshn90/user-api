@@ -4,6 +4,7 @@ import cats.effect._
 import com.carher.UnitSpec
 import com.carher.authentication.AuthenticationService
 import com.carher.config.JwtConfig
+import com.carher.http4s.matcher.Http4sResponseMatchers
 import com.carher.payload.JwtUserPayload
 import org.http4s.{AuthScheme, AuthedRoutes, Credentials, Headers, Request}
 import org.http4s.implicits._
@@ -12,7 +13,7 @@ import org.http4s.headers.Authorization
 import com.softwaremill.macwire.wire
 
 
-class AuthMiddlewareJwtTest extends UnitSpec {
+class AuthMiddlewareJwtTest extends UnitSpec with Http4sResponseMatchers[IO] {
 
   val jwtConfig: JwtConfig = JwtConfig(password = "test", prefix = AuthScheme.Bearer.toString(), expirationSeconds = 60)
   val authenticationService: AuthenticationService = wire[AuthenticationService]
@@ -25,9 +26,8 @@ class AuthMiddlewareJwtTest extends UnitSpec {
 
     val response = authMiddlewareJwt.authMiddleware(authedRoutes)
       .orNotFound(Request[IO]())
-      .unsafeRunSync()
 
-    response.status shouldBe Forbidden
+    response should beStatus(Forbidden)
   }
 
   "Request with correct Jwt token" should "response with status Ok" in {
@@ -39,9 +39,8 @@ class AuthMiddlewareJwtTest extends UnitSpec {
 
     val response = authMiddlewareJwt.authMiddleware(authedRoutes)
       .orNotFound(request)
-      .unsafeRunSync()
 
-    response.status shouldBe Ok
+    response should beStatus(Ok)
   }
 
 }
