@@ -27,7 +27,7 @@ class AuthMiddlewareJwtTest extends UnitSpec with Http4sResponseMatchers[IO] {
     val response = authMiddlewareJwt.authMiddleware(authedRoutes)
       .orNotFound(Request[IO]())
 
-    response should beStatus(Forbidden)
+    response should beResponse(Forbidden)
   }
 
   "Request with correct Jwt token" should "response with status Ok" in {
@@ -40,7 +40,7 @@ class AuthMiddlewareJwtTest extends UnitSpec with Http4sResponseMatchers[IO] {
     val response = authMiddlewareJwt.authMiddleware(authedRoutes)
       .orNotFound(request)
 
-    response should beStatus(Ok)
+    response should beResponse(Ok)
   }
 
 }

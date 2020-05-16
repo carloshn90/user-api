@@ -19,7 +19,7 @@ class UserAccountHttpErrorHandlerTest extends UnitSpec with Http4sResponseMatche
     val handleErrorRoute: HttpRoutes[IO] = userAccountHttpErrorHandler.handle(errRoute)
     val response = handleErrorRoute.orNotFound(Request[IO]())
 
-    response should beStatusAndBody(InternalServerError, s"Internal server error: $tesMessage")
+    response should beResponse(InternalServerError, s"Internal server error: $tesMessage")
   }
 
   "Http error handle exception with message" should "response with internal server error" in {
@@ -28,7 +28,7 @@ class UserAccountHttpErrorHandlerTest extends UnitSpec with Http4sResponseMatche
     val handleErrorRoute: HttpRoutes[IO] = userAccountHttpErrorHandler.handle(errRoute)
     val response = handleErrorRoute.orNotFound(Request[IO]().withEmptyBody)
 
-    response should beStatusAndBody(InternalServerError, "")
+    response should beResponse(InternalServerError, "")
   }
 
 }

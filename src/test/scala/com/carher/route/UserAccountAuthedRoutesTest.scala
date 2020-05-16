@@ -32,7 +32,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .orNotFound
       .run(Request(method = Method.GET, uri = uri"/"))
 
-    response should beStatusAndBody(Status.Ok, userAccountPayload)
+    response should beResponse(Status.Ok, userAccountPayload)
   }
 
   "Get userAccount not authorized" should "status forbidden" in {
@@ -45,7 +45,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .orNotFound
       .run(Request(method = Method.GET, uri = uri"/"))
 
-    response should beStatus(Status.Forbidden)
+    response should beResponse(Status.Forbidden)
   }
 
   "Post create userAccount authorized" should "status created and user id" in {
@@ -66,7 +66,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
         body = createBody(userAccountPayload)
       ))
 
-    response should beStatusAndBody(Status.Created, UserAccountResultPayload(idInserted))
+    response should beResponse(Status.Created, UserAccountResultPayload(idInserted))
   }
 
   "Post create userAccount some error" should "status bad request" in {
@@ -86,7 +86,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
         body = createBody(userAccountPayload)
       ))
 
-    response should beStatus(Status.BadRequest)
+    response should beResponse(Status.BadRequest)
   }
 
   "Post create userAccount not authorized" should "status forbidden" in {
@@ -100,7 +100,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .orNotFound
       .run(Request(method = Method.POST, uri = uri"/"))
 
-    response should beStatus(Status.Forbidden)
+    response should beResponse(Status.Forbidden)
   }
 
   "Put update userAccount authorized" should "status ok and user id" in {
@@ -121,7 +121,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
         body = createBody(userAccountPayload)
       ))
 
-    response should beStatusAndBody(Status.Ok, UserAccountResultPayload(idUpdated))
+    response should beResponse(Status.Ok, UserAccountResultPayload(idUpdated))
   }
 
   "Put update userAccount some error" should "status bad request" in {
@@ -141,7 +141,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
         body = createBody(userAccountPayload)
       ))
 
-    response should beStatus(Status.BadRequest)
+    response should beResponse(Status.BadRequest)
   }
 
   "Put update userAccount not authorized" should "status forbidden" in {
@@ -155,7 +155,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .orNotFound
       .run(Request(method = Method.PUT, uri = uri"/"))
 
-    response should beStatus(Status.Forbidden)
+    response should beResponse(Status.Forbidden)
   }
 
   "Delete userAccount authorized" should "status ok and the number of row deleted" in {
@@ -174,7 +174,7 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
         uri = uri"/"
       ))
 
-    response should beStatusAndBody(Status.Ok, UserAccountResultPayload(numberOfRowDeleted))
+    response should beResponse(Status.Ok, UserAccountResultPayload(numberOfRowDeleted))
   }
 
   "Delete userAccount not authorized" should "status forbidden" in {
@@ -188,6 +188,6 @@ class UserAccountAuthedRoutesTest extends UnitSpec with CirceJsonCodecs with Htt
       .orNotFound
       .run(Request(method = Method.DELETE, uri = uri"/"))
 
-    response should beStatus(Status.Forbidden)
+    response should beResponse(Status.Forbidden)
   }
 }

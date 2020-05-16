@@ -7,7 +7,8 @@ import com.carher.http4s.util.Http4sUtil.createBody
 import com.carher.json.CirceJsonCodecs
 import com.carher.payload.LoginRequestPayload
 import com.carher.service.UserAccountService
-import org.http4s.{Method, Request, Response, Status}
+import org.http4s.headers.`WWW-Authenticate`
+import org.http4s.{Challenge, Header, Headers, Method, Request, Response, Status}
 import org.http4s.implicits._
 
 class UserAccountRoutesTest extends UnitSpec with CirceJsonCodecs with Http4sResponseMatchers[IO] {
@@ -29,7 +30,7 @@ class UserAccountRoutesTest extends UnitSpec with CirceJsonCodecs with Http4sRes
         body = createBody(loginPayload)
       ))
 
-    response should beStatusAndBody(Status.Ok, token)
+    response should beResponse(Status.Ok, token)
   }
 
   "Get login user fail" should "status Unauthorized" in {
@@ -47,7 +48,8 @@ class UserAccountRoutesTest extends UnitSpec with CirceJsonCodecs with Http4sRes
         body = createBody(loginPayload)
       ))
 
-    response should beStatus(Status.Unauthorized)
+    val header: Header = `WWW-Authenticate`(Challenge("Basic", "Access to the staging site", Map("charset" -> "UTF-8")))
+    response should beResponse(Status.Unauthorized, headers = Headers.of(header))
   }
 
 }
