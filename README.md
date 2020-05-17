@@ -16,6 +16,12 @@ Cats-effect, Http4s and Doobie.
 
 ## Usage
 
+To create the database
+
+```
+sbt flywayMigrate
+```
+
 To compile-and-run:
 
 ```

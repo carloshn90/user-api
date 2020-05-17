@@ -14,18 +14,19 @@ class UserAccountDoobieTest extends UnitSpec {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    sql"""CREATE TABLE user_account (id SERIAL not null primary key, name varchar, surname varchar, username varchar,
-         email varchar UNIQUE, password varchar)"""
+    sql"""CREATE SCHEMA user_schema"""
       .update
       .run
       .transact(transactor)
       .unsafeRunSync
+
+    PostgresDbUtil.initDb
   }
 
   override protected def afterEach(): Unit = {
     super.beforeEach()
 
-    sql"DELETE FROM user_account"
+    sql"DELETE FROM user_schema.user_account"
       .update
       .run
       .transact(transactor)
@@ -35,7 +36,7 @@ class UserAccountDoobieTest extends UnitSpec {
   override def afterAll(): Unit = {
     super.afterAll()
 
-    sql"DROP TABLE user_account"
+    sql"""DROP SCHEMA user_schema CASCADE"""
       .update
       .run
       .transact(transactor)

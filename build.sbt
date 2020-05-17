@@ -1,6 +1,6 @@
 name := "user-api"
 
-version := "0.1"
+version := "0.0.1"
 
 scalaVersion := "2.13.2"
 
@@ -20,6 +20,7 @@ val wireVersion = "2.3.3"
 val pureConfigVersion = "0.12.3"
 val jwtVersion = "4.2.0"
 val otjPgVersion = "0.13.3"
+val flywayVersion = "6.4.2"
 val scalaMockVersion = "4.4.0"
 val scalaTestVersion = "3.1.0"
 
@@ -61,6 +62,15 @@ libraryDependencies ++= Seq(
 //  Embedded postgesql
   "com.opentable.components" % "otj-pg-embedded" % otjPgVersion % Test,
 
+//  Flyway
+  "org.flywaydb" % "flyway-core" % flywayVersion,
+
   "org.scalamock" %% "scalamock" % scalaMockVersion % Test,
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
 )
+
+enablePlugins(FlywayPlugin)
+flywayUrl := "jdbc:postgresql://localhost:5432/postgres"
+flywayUser := "postgres"
+flywayPassword := "password"
+flywaySchemas += "user_schema"

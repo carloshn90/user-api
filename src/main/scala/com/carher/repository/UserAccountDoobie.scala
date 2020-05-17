@@ -16,14 +16,14 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
   implicit val han: LogHandler = LogHandler.jdkLogHandler
 
   override def findByEmailAndPassword(email: String, password: String): F[Option[UserAccountModel]] =
-    sql"SELECT * FROM user_account WHERE email = $email AND password = $password"
+    sql"SELECT * FROM user_schema.user_account WHERE email = $email AND password = $password"
       .query[UserAccountModel]
       .to[List]
       .map(_.headOption)
       .transact(xa)
 
   override def findById(id: Long): F[Option[UserAccountModel]] =
-    sql"SELECT * FROM user_account"
+    sql"SELECT * FROM user_schema.user_account"
       .query[UserAccountModel]
       .to[List]
       .map(_.headOption)
@@ -60,7 +60,7 @@ class UserAccountDoobie[F[_]: Sync](xa: Transactor[F]) extends UserAccountReposi
       }
   }
 
-  override def delete(id: Long): F[Int] = sql"DELETE FROM user_account WHERE id = $id".update.run.transact(xa)
+  override def delete(id: Long): F[Int] = sql"DELETE FROM user_schema.user_account WHERE id = $id".update.run.transact(xa)
 }
 
 object UserAccountDoobie {
@@ -70,7 +70,7 @@ object UserAccountDoobie {
     (columns.toSet, columns.mkString(","))
   }
 
-  val insertUserAccountFrag: Fragment = fr"INSERT INTO user_account (" ++ Fragment.const(columnsWithComma) ++ fr")"
-  val updateUserAccountFrag: Fragment = fr"UPDATE user_account SET (" ++ Fragment.const(columnsWithComma) ++ fr") = "
+  val insertUserAccountFrag: Fragment = fr"INSERT INTO user_schema.user_account (" ++ Fragment.const(columnsWithComma) ++ fr")"
+  val updateUserAccountFrag: Fragment = fr"UPDATE user_schema.user_account SET (" ++ Fragment.const(columnsWithComma) ++ fr") = "
   val whereIdEqualFrag: Fragment = fr"WHERE id = "
 }
