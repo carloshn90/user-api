@@ -14,7 +14,7 @@ The goal of this project is to create a small microservice using
 functional code. The main libraries in this project are 
 Cats-effect, Http4s and Doobie. 
 
-## Usage
+## Available Scripts
 
 To create the database
 
